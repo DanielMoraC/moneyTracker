@@ -21,7 +21,8 @@ export class UserModel {
 
     return {
       _id: user._id,
-      userName: user.userName
+      userName: user.userName,
+      name: user.name
     }
   }
 
@@ -43,9 +44,11 @@ export class UserModel {
     const salt = Number(process.env.HASH) ?? 10
 
     const hashedPassword = hashSync(user.password, salt)
+
     const newUser = {
       userName: user.userName.toLowerCase(),
-      password: hashedPassword
+      password: hashedPassword,
+      name: user.name
     }
 
     const result = await db.collection('users').insertOne(newUser)
@@ -56,7 +59,8 @@ export class UserModel {
 
     return {
       _id: createdUser._id,
-      userName: createdUser.userName
+      userName: createdUser.userName,
+      name: createdUser.name
     }
   }
 
@@ -89,7 +93,8 @@ export class UserModel {
 
     return {
       _id: user._id,
-      userName: user.userName
+      userName: user.userName,
+      name: user.name
     }
   }
 }

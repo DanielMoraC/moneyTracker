@@ -8,9 +8,9 @@ export const tokenSession = (req, res, next) => {
 
   try {
     data = jwt.verify(token, process.env.JWT_SECRET)
-    req.session.user = data
+    req.session.tokenUser = data
   } catch (error) {
-    req.session.user = null
+    req.session.tokenUser = null
   }
 
   next()

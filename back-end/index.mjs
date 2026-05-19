@@ -5,6 +5,7 @@ import { run } from './db.mjs'
 import { UserController } from './controllers/usersController.mjs'
 import coockieParser from 'cookie-parser'
 import { tokenSession } from './middleware/tokenSession.mjs'
+import { accountsRouter } from './routes/accountsRoute.mjs'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -20,6 +21,8 @@ app.get('/', (req, res) => {
 })
 
 app.use('/users', usersRouter)
+
+app.use('/accounts', accountsRouter)
 
 app.post('/register', UserController.registerUser)
 

@@ -1,5 +1,5 @@
 import { UserModel } from '../models/usersModel.mjs'
-import { validateUser } from '../schemas/usersSchema.mjs'
+import { validateUser, validatePartialUser } from '../schemas/usersSchema.mjs'
 import jwt from 'jsonwebtoken'
 
 export class UserController {
@@ -22,7 +22,7 @@ export class UserController {
 
       if (!user) throw new Error('No se ha encontrado el usuario')
       console.log(user)
-      res.send({ _id: user._id, userName: user.userName })
+      res.send({ _id: user._id, userName: user.userName, name: user.name })
     } catch (error) {
       res.status(400).send({ error: error.message })
     }
@@ -37,19 +37,26 @@ export class UserController {
       const createdUser = await UserModel.postUser({ user: result.data })
 
       if (!createdUser) throw new Error('Ha ocurrido un error al crear el usuario')
-      res.status(201).send({ _id: createdUser._id, userName: createdUser.userName })
+      res.status(201).send({ _id: createdUser._id, userName: createdUser.userName, name: createdUser.name })
     } catch (error) {
       res.status(400).send({ error: error.message })
     }
   }
 
   static async deleteUser (req, res) {
-    const { user } = req.session
-    if (!user) res.status(401).send({ error: 'No se ha encontrado el token' })
+    const { tokenUser } = req.session
+    if (!tokenUser) {
+      res.status(401).send({ error: 'No se ha encontrado el token' })
+      return
+    }
 
     const { id } = req.params
 
     try {
+      if (tokenUser._id !== id) {
+        throw new Error('Usuario no valido')
+      }
+
       const deletedUser = await UserModel.deleteUser({ '_id.$oid': id })
 
       if (!deletedUser) throw new Error('Ha ocurrido un error al eliminar el usuario')
@@ -65,7 +72,7 @@ export class UserController {
   }
 
   static async loginUser (req, res) {
-    const result = validateUser(req.body)
+    const result = validatePartialUser(req.body)
 
     if (!result.success) res.status(400).send({ error: result.error.message })
 
@@ -75,7 +82,9 @@ export class UserController {
       if (!user) throw new Error('El usuario no existe')
 
       const token = jwt.sign({ _id: user._id, userName: user.userName }, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.status(200).coockie('access_token', token, { httpOnly: true }).send({ _id: user._id, userName: user.userName })
+      // TODO: No devolver el token - ESTO ESTA MAL Y ES SOLO PARA EL DESARROLLO
+      // res.status(200).cookie('access_token', token, { httpOnly: true }).send({ _id: user._id, userName: user.userName, name: user.name })
+      res.status(200).cookie('access_token', token, { httpOnly: true }).send({ _id: user._id, userName: user.userName, name: user.name, token })
     } catch (error) {
       res.status(400).send({ error: error.message })
     }

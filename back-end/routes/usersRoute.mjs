@@ -3,7 +3,7 @@ import { UserController } from '../controllers/usersController.mjs'
 
 export const usersRouter = Router()
 
-// usersRouter.get('/', UserController.getAllUsers)
+usersRouter.get('/', UserController.getAllUsers)
 
 usersRouter.get('/:id', UserController.getUser)
 
